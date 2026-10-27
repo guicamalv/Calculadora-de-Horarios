@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#6750A4" />
+  <meta name="description" content="Calculadora de Ajuste de Horários para câmeras e dispositivos com relógio incorreto." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AjustaHora" />
+
+  <title>AjustaHora</title>
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Google Fonts: Material Symbols + Nunito -->
+  <link href="fonts/fonts.css" rel="stylesheet" />
+
+  <style>
+    /* ── Material You Tokens ─────────────────────────────────── */
+    :root {
+      --md-primary:        #6750A4;
+      --md-on-primary:     #FFFFFF;
+      --md-primary-container: #EADDFF;
+      --md-on-primary-container: #21005D;
+
+      --md-secondary:      #625B71;
+      --md-on-secondary:   #FFFFFF;
+      --md-secondary-container: #E8DEF8;
+      --md-on-secondary-container: #1D192B;
+
+      --md-surface:        #FFFBFE;
+      --md-surface-variant:#E7E0EC;
+      --md-on-surface:     #1C1B1F;
+      --md-on-surface-variant: #49454F;
+      --md-outline:        #79747E;
+      --md-outline-variant:#CAC4D0;
+
+      --md-error:          #B3261E;
+      --md-error-container:#F9DEDC;
+      --md-on-error-container:#410E0B;
+
+      --md-success:        #386A20;
+      --md-success-container: #B7F397;
+      --md-on-success-container: #072100;
+
+      --md-info-container: #D3E4FF;
+      --md-on-info-container: #001B3D;
+
+      --md-background:     #FFFBFE;
+      --md-shadow:         rgba(0,0,0,.08);
+      --md-shadow-md:      rgba(0,0,0,.15);
+
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 28px;
+      --radius-full: 9999px;
+
+      --ease-standard: cubic-bezier(.2,0,0,1);
+      --ease-decelerate: cubic-bezier(0,0,0,1);
+      --ease-accelerate: cubic-bezier(.3,0.1,1,1);
+    }
+
+    /* ── Dark scheme ───────────────────────────────────────── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --md-primary:        #D0BCFF;
+        --md-on-primary:     #381E72;
+        --md-primary-container: #4F378B;
+        --md-on-primary-container: #EADDFF;
+
+        --md-secondary:      #CCC2DC;
+        --md-on-secondary:   #332D41;
+        --md-secondary-container: #4A4458;
+        --md-on-secondary-container: #E8DEF8;
+
+        --md-surface:        #1C1B1F;
+        --md-surface-variant:#49454F;
+        --md-on-surface:     #E6E1E5;
+        --md-on-surface-variant: #CAC4D0;
+        --md-outline:        #938F99;
+        --md-outline-variant:#49454F;
+
+        --md-error:          #F2B8B5;
+        --md-error-container:#8C1D18;
+        --md-on-error-container:#F9DEDC;
+
+        --md-success:        #9CD67D;
+        --md-success-container: #1F5200;
+        --md-on-success-container: #B7F397;
+
+        --md-info-container: #004787;
+        --md-on-info-container: #D3E4FF;
+
+        --md-background:     #1C1B1F;
+        --md-shadow:         rgba(0,0,0,.3);
+        --md-shadow-md:      rgba(0,0,0,.45);
+      }
+    }
+
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--md-background);
+      color: var(--md-on-surface);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top App Bar ────────────────────────────────────────── */
+    .top-app-bar {
+      background: var(--md-surface);
+      border-bottom: 1px solid var(--md-outline-variant);
+      padding: 0 16px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px var(--md-shadow);
+    }
+    .top-app-bar-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--md-primary-container);
+      display: grid; place-items: center;
+      color: var(--md-on-primary-container);
+      flex-shrink: 0;
+    }
+    .top-app-bar h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--md-on-surface);
+      flex: 1;
+    }
+    .install-btn {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+      font-family: inherit;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: filter .2s var(--ease-standard);
+    }
+    .install-btn:hover { filter: brightness(.92); }
+    .install-btn.visible { display: flex; }
+
+    /* ── Main layout ────────────────────────────────────────── */
+    main {
+      flex: 1;
+      padding: 24px 16px 100px;
+      max-width: 560px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Cards ──────────────────────────────────────────────── */
+    .card {
+      background: var(--md-surface);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: 0 2px 8px var(--md-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: slide-up .35s var(--ease-decelerate) both;
+    }
+    .card:nth-child(2) { animation-delay: .06s; }
+    .card:nth-child(3) { animation-delay: .12s; }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-header-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--md-primary-container);
+      display: grid; place-items: center;
+      color: var(--md-on-primary-container);
+      flex-shrink: 0;
+    }
+    .card-header-text h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--md-on-surface);
+    }
+    .card-header-text p {
+      font-size: .8rem;
+      color: var(--md-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    /* ── Form fields (Material You outlined style) ──────────── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field label {
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--md-primary);
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .field-input-wrap {
+      position: relative;
+    }
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--md-surface-variant);
+      border: 2px solid var(--md-outline-variant);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      outline: none;
+      transition: border-color .2s var(--ease-standard),
+                  box-shadow .2s var(--ease-standard);
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--md-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary) 20%, transparent);
+    }
+    /* colorscheme for datetime pickers */
+    .field input { color-scheme: light dark; }
+
+    /* ── Divider row ────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--md-outline);
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--md-outline-variant);
+    }
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: inherit;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: filter .2s var(--ease-standard),
+                  transform .1s var(--ease-standard),
+                  box-shadow .2s var(--ease-standard);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn .material-symbols-outlined { font-size: 18px; }
+
+    .btn-filled {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: 0 1px 4px var(--md-shadow-md);
+    }
+    .btn-filled:hover { filter: brightness(1.1); }
+
+    .btn-tonal {
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+    }
+    .btn-tonal:hover { filter: brightness(.94); }
+
+    .btn-outlined {
+      background: transparent;
+      color: var(--md-primary);
+      border: 2px solid var(--md-outline);
+    }
+    .btn-outlined:hover { background: color-mix(in srgb, var(--md-primary) 8%, transparent); }
+
+    .btn:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* ── Result chips ───────────────────────────────────────── */
+    .result-box {
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: none;
+      gap: 12px;
+      flex-direction: column;
+      animation: fade-in .25s var(--ease-decelerate);
+    }
+    .result-box.visible { display: flex; }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(.97); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .result-box.info {
+      background: var(--md-info-container);
+      color: var(--md-on-info-container);
+    }
+    .result-box.success {
+      background: var(--md-success-container);
+      color: var(--md-on-success-container);
+    }
+    .result-box.error {
+      background: var(--md-error-container);
+      color: var(--md-on-error-container);
+    }
+
+    .result-label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .75;
+    }
+    .result-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    /* ── Snackbar ───────────────────────────────────────────── */
+    .snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #313033;
+      color: #E6E1E5;
+      padding: 14px 24px;
+      border-radius: var(--radius-full);
+      font-size: .9rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,.35);
+      z-index: 1000;
+      transition: transform .3s var(--ease-decelerate), opacity .3s;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    .snackbar.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── FAB (reset) ────────────────────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      width: 56px; height: 56px;
+      border-radius: var(--radius-lg);
+      border: none;
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+      display: grid; place-items: center;
+      cursor: pointer;
+      box-shadow: 0 3px 12px var(--md-shadow-md);
+      transition: transform .2s var(--ease-standard),
+                  box-shadow .2s var(--ease-standard);
+      z-index: 50;
+    }
+    .fab:hover { transform: scale(1.05); box-shadow: 0 6px 18px var(--md-shadow-md); }
+    .fab:active { transform: scale(.95); }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 400px) {
+      .top-app-bar h1 { font-size: 1.05rem; }
+      .card { padding: 18px; }
+      .btn { padding: 11px 14px; font-size: .82rem; }
+    }
+
+    /* ── PWA safe area ──────────────────────────────────────── */
+    @supports (padding: max(0px)) {
+      main { padding-bottom: max(100px, calc(env(safe-area-inset-bottom) + 80px)); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Bar -->
+  <header class="top-app-bar">
+    <div class="top-app-bar-icon">
+      <span class="material-symbols-outlined">schedule</span>
+    </div>
+    <h1>AjustaHora</h1>
+    <button class="install-btn" id="install-btn">
+      <span class="material-symbols-outlined" style="font-size:16px">download</span>
+      Instalar
+    </button>
+  </header>
+
+  <main>
+
+    <!-- Card 1: Calcular diferença -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <span class="material-symbols-outlined">compare_arrows</span>
+        </div>
+        <div class="card-header-text">
+          <h2>Calcular Diferença</h2>
+          <p>Informe o horário real e o horário errado do dispositivo</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="real-date">Horário Real</label>
+        <input type="datetime-local" id="real-date" />
+      </div>
+
+      <div class="field">
+        <label for="wrong-date">Horário Errado (dispositivo)</label>
+        <input type="datetime-local" id="wrong-date" />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-tonal" onclick="copyRealToWrong()">
+          <span class="material-symbols-outlined">content_copy</span>
+          Copiar data
+        </button>
+        <button class="btn btn-filled" onclick="calculateDifference()">
+          <span class="material-symbols-outlined">calculate</span>
+          Calcular
+        </button>
+      </div>
+
+      <div class="result-box info" id="difference-box">
+        <span class="result-label">Diferença calculada</span>
+        <span class="result-value" id="difference"></span>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider">Converter horário</div>
+
+    <!-- Card 2: Ajustar -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <span class="material-symbols-outlined">swap_horiz</span>
+        </div>
+        <div class="card-header-text">
+          <h2>Ajustar Horário</h2>
+          <p>Converta qualquer horário usando a diferença calculada</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="new-date">Nova Data/Horário</label>
+        <input type="datetime-local" id="new-date" />
+      </div>
+
+      <div class="field">
+        <label for="new-date-type">Esse horário é</label>
+        <select id="new-date-type">
+          <option value="real">⏱ Horário Real → converter para Errado</option>
+          <option value="wrong">📷 Horário Errado → converter para Real</option>
+        </select>
+      </div>
+
+      <button class="btn btn-filled" onclick="adjustDate()" disabled id="adjust-button">
+        <span class="material-symbols-outlined">autorenew</span>
+        Ajustar Horário
+      </button>
+
+      <div class="result-box success" id="result-box">
+        <span class="result-label" id="result-label">Resultado</span>
+        <span class="result-value" id="result"></span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FAB: resetar -->
+  <button class="fab" onclick="resetAll()" title="Limpar tudo">
+    <span class="material-symbols-outlined">refresh</span>
+  </button>
+
+  <!-- Snackbar -->
+  <div class="snackbar" id="snackbar"></div>
+
+  <!-- ── Service Worker & PWA install ───────────────────────── -->
+  <script>
+    /* ── State ── */
+    let timeDifference = 0;
+    let deferredPrompt = null;
+
+    /* ── Snackbar ── */
+    function showSnack(msg, duration = 2800) {
+      const sb = document.getElementById('snackbar');
+      sb.textContent = msg;
+      sb.classList.add('show');
+      setTimeout(() => sb.classList.remove('show'), duration);
+    }
+
+    /* ── Copy real → wrong ── */
+    function copyRealToWrong() {
+      const val = document.getElementById('real-date').value;
+      if (!val) { showSnack('Preencha o Horário Real primeiro.'); return; }
+      document.getElementById('wrong-date').value = val;
+      showSnack('Data copiada para o campo Horário Errado.');
+    }
+
+    /* ── Calculate difference ── */
+    function calculateDifference() {
+      const rVal = document.getElementById('real-date').value;
+      const wVal = document.getElementById('wrong-date').value;
+      if (!rVal || !wVal) { showSnack('Preencha os dois campos de data.'); return; }
+
+      const realDate  = new Date(rVal);
+      const wrongDate = new Date(wVal);
+      if (isNaN(realDate) || isNaN(wrongDate)) { showSnack('Datas inválidas.'); return; }
+
+      timeDifference = realDate - wrongDate;
+      const abs = Math.abs(timeDifference);
+      const status = timeDifference > 0 ? '⏩ adiantado' : '⏪ atrasado';
+
+      const totalSec = Math.floor(abs / 1000);
+      const years   = Math.floor(totalSec / (60*60*24*365));
+      const rem1    = totalSec % (60*60*24*365);
+      const months  = Math.floor(rem1 / (60*60*24*30));
+      const rem2    = rem1 % (60*60*24*30);
+      const days    = Math.floor(rem2 / (60*60*24));
+      const rem3    = rem2 % (60*60*24);
+      const hours   = Math.floor(rem3 / 3600);
+      const mins    = Math.floor((rem3 % 3600) / 60);
+      const secs    = rem3 % 60;
+
+      const parts = [];
+      if (years)  parts.push(`${years} ano${years !== 1 ? 's' : ''}`);
+      if (months) parts.push(`${months} ${months !== 1 ? 'meses' : 'mês'}`);
+      if (days)   parts.push(`${days} dia${days !== 1 ? 's' : ''}`);
+      if (hours)  parts.push(`${hours}h`);
+      if (mins)   parts.push(`${mins}min`);
+      parts.push(`${secs}s`);
+
+      const box  = document.getElementById('difference-box');
+      const text = document.getElementById('difference');
+      text.textContent = `${parts.join(' ')} — dispositivo ${status}`;
+      box.classList.add('visible');
+
+      document.getElementById('adjust-button').disabled = false;
+      showSnack('Diferença calculada com sucesso!');
+    }
+
+    /* ── Adjust date ── */
+    function adjustDate() {
+      const val = document.getElementById('new-date').value;
+      if (!val) { showSnack('Informe a Nova Data/Horário.'); return; }
+
+      const nd = new Date(val);
+      if (isNaN(nd)) { showSnack('Data inválida.'); return; }
+
+      const type = document.getElementById('new-date-type').value;
+      let adjusted, labelText;
+
+      if (type === 'real') {
+        adjusted  = new Date(nd.getTime() - timeDifference);
+        labelText = '📷 Horário Errado correspondente';
+      } else {
+        adjusted  = new Date(nd.getTime() + timeDifference);
+        labelText = '✅ Horário Real correspondente';
+      }
+
+      const formatted = adjusted.toLocaleString('pt-BR', {
+        day:'2-digit', month:'2-digit', year:'numeric',
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
+
+      document.getElementById('result-label').textContent = labelText;
+      document.getElementById('result').textContent = formatted;
+      document.getElementById('result-box').classList.add('visible');
+    }
+
+    /* ── Reset ── */
+    function resetAll() {
+      ['real-date','wrong-date','new-date'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('new-date-type').value = 'real';
+      document.getElementById('difference-box').classList.remove('visible');
+      document.getElementById('result-box').classList.remove('visible');
+      document.getElementById('adjust-button').disabled = true;
+      timeDifference = 0;
+      showSnack('Campos resetados.');
+    }
+
+    /* ── PWA: Install prompt ── */
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-btn').classList.add('visible');
+    });
+
+    document.getElementById('install-btn').addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('install-btn').classList.remove('visible');
+      if (outcome === 'accepted') showSnack('App instalado com sucesso! 🎉');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('install-btn').classList.remove('visible');
+    });
+
+    /* ── Service Worker ── */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .catch(err => console.warn('SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
