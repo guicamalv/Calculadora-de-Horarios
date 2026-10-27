@@ -56,6 +56,7 @@ ajustahora/
 ├── sw.js            # Service Worker (cache offline, stale-while-revalidate)
 ├── icon-192.png     # Ícone PWA 192×192 px  ← você fornece
 ├── icon-512.png     # Ícone PWA 512×512 px  ← você fornece
+├── android/         # App Android (WebView) — veja android/README.md
 └── README.md
 ```
 
@@ -113,6 +114,11 @@ Nova data (errada): 2024-03-10 08:15:00
 
 ## 📱 Instalação como app
 
+### Android (APK)
+Baixe o `AjustaHora-<versão>.apk` na aba **[Releases](https://github.com/guicamalv/Calculadora-de-Horarios/releases/latest)** e instale no celular (será preciso permitir a instalação de fontes desconhecidas). Requer **Android 8.0 ou superior**.
+
+O app é o mesmo AjustaHora dentro de um WebView, com fontes e ícones embutidos no próprio app, sem depender de recursos externos nem do navegador. O código-fonte está em [`android/`](android/) (instruções de build no [README](android/README.md) da pasta).
+
 ### Android (Chrome / Edge)
 1. Acesse o site pelo navegador
 2. Toque no botão **"Instalar"** na barra superior, ou
@@ -150,7 +156,8 @@ Ferramentas recomendadas:
 - **JavaScript** vanilla (ES2020+) — sem frameworks, sem dependências de build
 - **Service Worker API** — cache offline com estratégia *network-first* + *stale-while-revalidate*
 - **Web App Manifest** — instalação nativa PWA
-- **Google Fonts** — Nunito + Material Symbols Outlined
+- **Android (Kotlin + WebView)** — app nativo que empacota a versão web, em [`android/`](android/)
+- **Google Fonts** — Nunito + Material Symbols Outlined (embutidas localmente no app Android)
 - **Material Design 3 (Material You)** — sistema de design e tokens
 
 ---
